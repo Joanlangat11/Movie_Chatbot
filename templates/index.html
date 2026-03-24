@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Movie Chatbot</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      margin-top: 50px;
+    }
+
+    .chat-container {
+      width: 400px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 15px;
+    }
+
+    h3 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .chat-box {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+
+    .message {
+      margin: 8px 0;
+      line-height: 1.4;
+    }
+
+    .user {
+      text-align: right;
+      color: #007bff;
+    }
+
+    .bot {
+      text-align: left;
+      color: #28a745;
+    }
+
+    .input-area {
+      display: flex;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    button {
+      padding: 10px;
+      margin-left: 5px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="chat-container">
+  <h3>🎬 Movie Chatbot</h3>
+
+  <div id="chat-box" class="chat-box"></div>
+
+  <div class="input-area">
+    <input id="message" type="text" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+async function sendMessage() {
+  const input = document.getElementById("message");
+  const chatBox = document.getElementById("chat-box");
+
+  const message = input.value.trim();
+  if (!message) return;
+
+  // Show user message
+  chatBox.innerHTML += `<div class="message user"><b>You:</b> ${message}</div>`;
+  input.value = "";
+
+  try {
+    const response = await fetch("/chat", {   // ✅ relative path (important)
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: message })
+    });
+
+    const data = await response.json();
+
+    // Show bot reply
+    chatBox.innerHTML += `
+      <div class="message bot">
+        <b>Bot:</b> ${data.reply}
+      </div>
+    `;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+  } catch (error) {
+    chatBox.innerHTML += `
+      <div class="message bot">
+        ⚠️ Error connecting to server
+      </div>
+    `;
+  }
+}
+
+// Press Enter to send
+document.getElementById("message")
+  .addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+});
+</script>
+
+</body>
+</html>
